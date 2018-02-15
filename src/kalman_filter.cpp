@@ -36,8 +36,9 @@ void KalmanFilter::Update(const VectorXd &z) {
   */
 	
 	VectorXd y = z - (H_*x_);								//Calc error
-	MatrixXd S = H_*P_*H_.transpose() + R_;					//Calc S matrix
-	MatrixXd K = P_*H_.transpose()*S.inverse();				//Calc K matrix
+	MatrixXd PHt = P_*H_.transpose();
+	MatrixXd S = H_*PHt + R_;					//Calc S matrix
+	MatrixXd K = PHt*S.inverse();				//Calc K matrix
 	
 	x_ = x_ + K * y;										//Update state vector
 	int x_size = x_.size();			
@@ -49,12 +50,26 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   TODO:
     * update the state by using Extended Kalman Filter equations
   */
+	
 	VectorXd h = VectorXd(3);
-	float pxpy2sr = sqrt(x_(0)*x_(0) + x_(1)*x_(1));						//Calc sqrt(px^2+py^2)
-	h << pxpy2sr, atan2(x_(1),x_(0)), (x_(0)*x_(2)+x_(1)*x_(3))/pxpy2sr;	//Calc h vector
-	VectorXd y = z - h;														//Calc error
-	MatrixXd S = H_*P_*H_.transpose() + R_;									//Calc S matrix
-	MatrixXd K = P_*H_.transpose()*S.inverse();								//Calc K matrix
+	double pxpy2 = x_(0)*x_(0) + x_(1)*x_(1);								//Calc px^2+py^2
+	if(pxpy2 > 0.00001){
+		double pxpy2sr = sqrt(pxpy2);												//Calc sqrt(px^2+py^2)
+		h << pxpy2sr, atan2(x_(1), x_(0)), (x_(0)*x_(2) + x_(1)*x_(3)) / pxpy2sr;	//Calc h vector
+	}
+	else {
+		h << 0.0, atan2(x_(1), x_(0)), 0;
+	}
+	while (h(1) - z(1) > M_PI / 2) {
+		h(1) -= M_PI;
+	}
+	while (z(1) - h(1) > M_PI/2) {
+		h(1) += M_PI;
+	}
+	VectorXd y = z - h;											//Calc error
+	MatrixXd PHt = P_*H_.transpose();							//Calc P_*H^T
+	MatrixXd S = H_*PHt + R_;									//Calc S matrix
+	MatrixXd K = PHt*S.inverse();								//Calc K matrix
 
 	x_ = x_ + K * y;														//Update state vector
 	int x_size = x_.size();													

@@ -39,10 +39,10 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   */
 	MatrixXd jacobian = MatrixXd(3, 4);
 
-	float px = x_state(0);
-	float py = x_state(1);
-	float vx = x_state(2);
-	float vy = x_state(3);
+	double px = x_state(0);
+	double py = x_state(1);
+	double vx = x_state(2);
+	double vy = x_state(3);
 
 	if ((px + py) < 0.0001) {
 		cout << "divisor (px^2+py^2) near zero --> jacobian will not be calculated" << endl;
@@ -52,9 +52,9 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 		return jacobian;
 	}
 
-	float pxpy2 = px*px + py*py;
-	float pxpy2sr = sqrt(pxpy2);
-	float pxpy23sr = pow(pxpy2, 1.5);
+	double pxpy2 = px*px + py*py;
+	double pxpy2sr = sqrt(pxpy2);
+	double pxpy23sr = pow(pxpy2, 1.5);
 
 	jacobian << px / pxpy2sr, py / pxpy2sr, 0.0, 0.0,
 		-py / pxpy2, px / pxpy2, 0.0, 0.0,

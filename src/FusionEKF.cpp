@@ -39,8 +39,8 @@ FusionEKF::FusionEKF() {
     * Finish initializing the FusionEKF.
     * Set the process and measurement noises
   */
-  noise_ax_ = 9.0;		//Define noise for ekf_.Q_ process covariance matrix
-  noise_ay_ = 9.0;		//Define noise for ekf_.Q_ process covariance matrix
+  noise_ax_ = 30.0;		//Define noise for ekf_.Q_ process covariance matrix
+  noise_ay_ = 30.0;		//Define noise for ekf_.Q_ process covariance matrix
   noise_ax_sr_ = 3.0;	//Define noise for ekf_.u_ prediction noise --> currently unused
   noise_ay_sr_ = 3.0;	//Define noise for ekf_.u_ prediction noise --> currently unused
 
@@ -99,7 +99,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       /**
       Convert radar from polar to cartesian coordinates and initialize state.
       */
-		ekf_.x_(0) = measurement_pack.raw_measurements_(0) * cos(measurement_pack.raw_measurements_z(1));
+		ekf_.x_(0) = measurement_pack.raw_measurements_(0) * cos(measurement_pack.raw_measurements_(1));
 		ekf_.x_(1) = measurement_pack.raw_measurements_(0) * sin(measurement_pack.raw_measurements_(1));
 		ekf_.x_(2) = 0.0;// measurement_pack.raw_measurements_(2) * cos(measurement_pack.raw_measurements_(1));
 		ekf_.x_(3) = 0.0;// measurement_pack.raw_measurements_(2) * sin(measurement_pack.raw_measurements_(1));
@@ -124,7 +124,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    ****************************************************************************/
 
   // Elapsed time
-  float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;
+  double dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;
   previous_timestamp_ = measurement_pack.timestamp_;
 
   /**
@@ -140,12 +140,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   ekf_.F_(1, 3) = dt;
 
   //Update process noise
-  float dt2 = dt*dt;
+  double dt2 = dt*dt;
   ekf_.u_ << dt2 / 2 * noise_ax_sr_, dt2/2*noise_ay_sr_, dt*noise_ax_sr_, dt*noise_ay_sr_; // Update prediction noise --> currently unused
 
   //Update process covariance matrix
-  float dt3 = dt2*dt;
-  float dt4 = dt3*dt;
+  double dt3 = dt2*dt;
+  double dt4 = dt3*dt;
   dt3 = dt3 / 2.0;
   dt4 = dt4 / 4.0;
 
